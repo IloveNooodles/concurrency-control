@@ -26,9 +26,13 @@ class Simple():
         for action in self.action_list:
             self.parse(action)
         
+        while self.queue:
+            transaction = self.queue.pop(0)
+            self.parse(transaction)
+
         print("====================================================================================")
         print(">> All transaction have been completed")
-        print(">> Here are the result")
+        print(">> Here are the schedule")
         self.get_result()
         print("\n====================================================================================")
         
@@ -72,40 +76,41 @@ class Simple():
                 self.unlock(lock, transaction_number)
             self.completed_action.append(self.running_action)
             self.run_queue()
-            return
-
-        print(f">> Putting {self.running_action} in the queue")
-        if self.running_transaction not in self.transactions_in_queue.keys():
-            self.transactions_in_queue[self.running_action] = self.running_transaction
-        self.queue.append(self.running_action)
+        else:
+            print(f">> Putting {self.running_action} in the queue")
+            self.queue.append(self.running_action)
+            print(f">> Queue now: {self.queue}")
+            if self.running_transaction not in self.transactions_in_queue.keys():
+                self.transactions_in_queue[self.running_action] = self.running_transaction
   
     def write(self, resource: str, transaction_number: int):
         is_transaction_valid = self.validate_transaction('W', resource, transaction_number)
         if is_transaction_valid:
             self.completed_action.append(self.running_action)
-            print(f">> {self.running_transaction} is reading resource {resource}")
-            return
+            print(f">> {self.running_transaction} is writing resource {resource}")
 
-        transaction_holding_locks = self.locks[resource]
-        print(f">> Resource {resource} is being locked by T{transaction_holding_locks}")
-        print(f">> Putting {self.running_action} in the queue")
-        if self.running_transaction not in self.transactions_in_queue.keys():
-            self.transactions_in_queue[self.running_action] = self.running_transaction
-        self.queue.append(self.running_action)
+        else:
+            transaction_holding_locks = self.locks[resource]
+            print(f">> Resource {resource} is being locked by T{transaction_holding_locks}")
+            print(f">> Putting {self.running_action} in the queue")
+            self.queue.append(self.running_action)
+            print(f">> Queue now: {self.queue}")
+            if self.running_transaction not in self.transactions_in_queue.keys():
+                self.transactions_in_queue[self.running_action] = self.running_transaction
 
     def read(self, resource: str, transaction_number: int):
         is_transaction_valid = self.validate_transaction('R', resource, transaction_number)
         if is_transaction_valid:
             self.completed_action.append(self.running_action)
             print(f">> {self.running_transaction} is reading resource {resource}")
-            return
-
-        transaction_holding_locks = self.locks[resource]
-        print(f">> Resource {resource} is being locked by T{transaction_holding_locks}")
-        print(f">> Putting {self.running_action} in the queue")
-        if self.running_transaction not in self.transactions_in_queue.keys():
-            self.transactions_in_queue[self.running_action] = self.running_transaction
-        self.queue.append(self.running_action)
+        else:
+            transaction_holding_locks = self.locks[resource]
+            print(f">> Resource {resource} is being locked by T{transaction_holding_locks}")
+            print(f">> Putting {self.running_action} in the queue")
+            self.queue.append(self.running_action)
+            print(f">> Queue now: {self.queue}")
+            if self.running_transaction not in self.transactions_in_queue.keys():
+                self.transactions_in_queue[self.running_action] = self.running_transaction
 
     def lock(self, resource: str, transaction_number: int):
         self.locks[resource] = transaction_number
@@ -121,7 +126,7 @@ class Simple():
             print(f">> {self.running_transaction} unlocks resource {resource}")
         except KeyError:
             print(">> No resource found")
-  
+
     def run_queue(self):
         length_queue = len(self.queue)
         
@@ -158,5 +163,5 @@ class Simple():
             exit(1)
 
 if __name__ == "__main__":
-    s = Simple(['R1(X)', 'R2(Y)', 'R1(Y)', 'C1', 'C2'])
+    s = Simple(['R5(X)', 'R2(Y)', 'R1(Y)', 'W3(Y)', 'W3(Z)', 'R5(Z)', 'R1(X)', 'R4(W)', 'W3(W)', 'W5(Y)', 'W5(Z)', 'C1', 'C2', 'C3', 'C4', 'C5'])
     s.run()
