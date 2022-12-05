@@ -1,6 +1,6 @@
 # Tugas Besar II Manajemen Basis Data 2022 - Concurrency Control
 
-Concurrency control simulation is a simulation of how DBMS works. There are consist of two protocls, Optimistic Concurrency Control and Simple Concurrency control using binary locks.
+Concurrency control simulation is a simulation of how DBMS works. There are consist of two protocls, Optimistic Concurrency Control and Simple locking using only exclusive locks.
 
 Made with love by
 
@@ -34,7 +34,7 @@ options:
   -h, --help           show this help message and exit
 ```
 
-To run the program you can specify the path and protocol you want to use for example `python main.py simple test/tc1.txt` to run `tc1.txt` with simple concurrency control
+To run the program you can specify the path and protocol you want to use for example `python main.py simple test/tc1.txt` to run `tc1.txt` with simple locking
 
 In simple mode The program will ask prompt if you want to enable the deadlock prevention
 

@@ -131,6 +131,7 @@ class Simple():
     def read(self, resource: str, transaction_number: int):
         if self.running_transaction not in self.order_transaction.keys():
             self.order_transaction[self.running_transaction] = time()
+
         is_transaction_valid = self.validate_transaction('R', resource, transaction_number)
         if is_transaction_valid:
             self.completed_action.append(self.running_action)
@@ -143,7 +144,8 @@ class Simple():
             if self.is_deadlocked_prevention:
               if self.order_transaction[self.running_transaction] < self.order_transaction[transaction_holding_locks]:
                   self.abort(transaction_holding_locks)
-                # do wound wait
+                  self.completed_action.append(self.running_action)
+                  print(f">> {self.running_transaction} is reading resource {resource}")
             
             else: 
                 self.queue.append(self.running_action)
