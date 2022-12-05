@@ -1,4 +1,5 @@
 import argparse
+from time import sleep
 
 from src.occ import OCC
 from src.simple import Simple
@@ -41,14 +42,15 @@ class Main():
     def start(self):
         self.read_files()
         protocol = None
+        # print(self.schedule)
+        # sleep(5)
         if self.options == 'simple':
             protocol = Simple(self.schedule)
             protocol.run()
         elif self.options == 'optimistic':
             protocol = OCC(self.schedule)
             protocol.run()
-        print(self.schedule)
-          
+
 if __name__ == "__main__":
     main = Main()
     main.start()
