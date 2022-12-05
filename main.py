@@ -10,3 +10,5 @@ if __name__ == "__main__":
     file = open(filename, "r")
     arr = file.read()
     arr = arr.split(";")
+    arr = [x.strip() for x in arr]
+    print(arr)
