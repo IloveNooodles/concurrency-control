@@ -33,7 +33,8 @@ class Simple():
         if choice == 'y':
             self.is_deadlocked_prevention = True
         
-        for action in self.action_list:
+        while self.action_list:
+            action = self.action_list.pop(0)
             self.parse(action)
         
         # print(self.order_transaction)
@@ -83,6 +84,7 @@ class Simple():
         is_transaction_valid = self.validate_transaction('C', None, transaction_number)
         if is_transaction_valid:
             # unlocks all the the locks within the same transaction number
+            print(f">> {self.running_transaction} commited")
             self.unlock(transaction_number)
             self.completed_action.append(self.running_action)
             self.run_queue()
@@ -114,6 +116,7 @@ class Simple():
                 if self.order_transaction[self.running_transaction] < self.order_transaction[transaction_holding_locks]:
                     self.abort(transaction_holding_locks)
                     self.completed_action.append(self.running_action)
+                    self.lock(resource, transaction_number)
                     print(f">> {self.running_transaction} is writing resource {resource}")
             else:
                 print(f">> Putting {self.running_action} in the queue")
@@ -145,6 +148,7 @@ class Simple():
               if self.order_transaction[self.running_transaction] < self.order_transaction[transaction_holding_locks]:
                   self.abort(transaction_holding_locks)
                   self.completed_action.append(self.running_action)
+                  self.lock(resource, transaction_number)
                   print(f">> {self.running_transaction} is reading resource {resource}")
             
             else: 
@@ -224,6 +228,6 @@ class Simple():
 
 if __name__ == "__main__":
     # s = Simple(['R5(X)', 'R2(Y)', 'R1(Y)', 'W3(Y)', 'W3(Z)', 'R5(Z)', 'R1(X)', 'R4(W)', 'W3(W)', 'W5(Y)', 'W5(Z)', 'C1', 'C2', 'C3', 'C4', 'C5'])
-    # s = Simple(['R1(X)', 'R2(Y)', 'R1(Y)', 'C1', 'C2'])
-    s = Simple(['R1(a)', 'R2(b)', 'W1(b)', 'W2(a)', 'C1', 'C2'])
+    s = Simple(['R1(X)', 'R2(Y)', 'R1(Y)', 'C1', 'C2'])
+    # s = Simple(['R1(a)', 'R2(b)', 'W1(b)', 'W2(a)', 'C1', 'C2'])
     s.run()
