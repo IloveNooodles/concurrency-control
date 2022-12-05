@@ -32,19 +32,24 @@ class OCC():
     def validate(self, action, current_transaction):
         """Validation before commit"""
         valid = True
-        conflict_action = Action("-",0,0)
+        conflict_action = Action("-",0,"")
         for to_be_checked_transaction in self.list_transaction:
             if (to_be_checked_transaction.validate_time != 0 
                 and to_be_checked_transaction.validate_time < current_transaction.validate_time):
-                if to_be_checked_transaction.finish_time < current_transaction.finish_time:
+                if (to_be_checked_transaction.finish_time != 0 and 
+                 to_be_checked_transaction.finish_time < current_transaction.start_time):
                     continue
-                elif (current_transaction.start_time < to_be_checked_transaction.finish_time and
+                elif (to_be_checked_transaction.finish_time != 0 and 
+                      current_transaction.start_time < to_be_checked_transaction.finish_time and
                       to_be_checked_transaction.finish_time < current_transaction.validate_time):
                       for written_resource in to_be_checked_transaction.written_resources:
                         if written_resource in current_transaction.read_resources:
                             valid = False
                             conflict_action = Action("W", to_be_checked_transaction.transaction_no, written_resource)
                             break
+                else:
+                    valid = False
+                    break
         return valid, conflict_action
     
     def print_result(self):
@@ -77,11 +82,11 @@ class OCC():
                     self.log.append(action)                    
                 else:
                     # NOT VALID, ROLLBACK
-                    time.sleep(SLEEP_TIME)
                     print("Transaction " + str(current_transaction.transaction_no) + " is not committed, " + "conflict with " + conflict_action.type  + str(conflict_action.no)  + "(" + conflict_action.resource +")")
                     print("Transaction " + str(current_transaction.transaction_no) + " is aborted")
                     self.log.append(Action("A", current_transaction.transaction_no, ""))
                     current_transaction.start_time = time.time()
+                    time.sleep(SLEEP_TIME)
                     temp_action_list = deepcopy(self.action_list[:idx+1])
                     for action in current_transaction.action_log:
                         temp_action_list.append(action)
@@ -106,3 +111,4 @@ class OCC():
 
         print("\nFINAL SCHEDULE:")
         self.print_result()
+        print("\n")
