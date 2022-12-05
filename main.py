@@ -14,7 +14,7 @@ class Main():
         parser.add_argument(
             "concurrency_control",
             choices=["simple", "optimistic"],
-            help="choose concurrency control protocol, s[imple] for simple and o[ptimistic] for optimistic",
+            help="choose concurrency control protocol, s[imple] and o[ptimistic]",
         )
 
         parser.add_argument(
