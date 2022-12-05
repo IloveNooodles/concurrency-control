@@ -12,12 +12,15 @@ class Transaction():
         self.action_log = []
     
     def commit(self):
+        print("Transaction " + str(self.transaction_no) + " is committed")
         self.isCommitted = True
     
     def read(self, action: Action):
+        print("Transaction " + str(self.transaction_no) + " reads " + action.resource)
         self.read_resources.append(action.resource)
         self.action_log.append(action)
 
     def write(self, action: Action):
+        print("Transaction " + str(self.transaction_no) + " writes " + action.resource)
         self.written_resources.append(action.resource)
         self.action_log.append(action)

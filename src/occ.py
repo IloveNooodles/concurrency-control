@@ -7,6 +7,7 @@ from src.lib.occ_transaction import Transaction
 SLEEP_TIME = 0.00000000000001
 
 class OCC():
+    """Optimistic Concurrency Control Algorithm"""
     def __init__(self, arr: List[str]):
         self.action_list = []
         num_of_transaction = 0
@@ -23,13 +24,15 @@ class OCC():
         self.log = []
     
     def get_transaction(self, action: Action):
+        """Get the transaction object from the list of transaction by given action object"""
         for transaction in self.list_transaction:
             if action.no == transaction.transaction_no:
                 return transaction
     
     def validate(self, action, current_transaction):
-        # start validate
+        """Validation before commit"""
         valid = True
+        conflict_action = Action("-",0,0)
         for to_be_checked_transaction in self.list_transaction:
             if (to_be_checked_transaction.validate_time != 0 
                 and to_be_checked_transaction.validate_time < current_transaction.validate_time):
@@ -40,32 +43,44 @@ class OCC():
                       for written_resource in to_be_checked_transaction.written_resources:
                         if written_resource in current_transaction.read_resources:
                             valid = False
+                            conflict_action = Action("W", to_be_checked_transaction.transaction_no, written_resource)
                             break
-        return valid
+        return valid, conflict_action
+    
+    def print_result(self):
+        """Print the result of OCC"""
+        for action in self.log:
+            if action.type == "A" or action.type == "C":
+                print(f"{action.type}{action.no}", end=" ")
+            else:
+                print(f"{action.type}{action.no}({action.resource})", end=" ")
+            
 
     def run(self):
         idx = 0
         while(idx < len(self.action_list)):
-            #find the transaction
             action = self.action_list[idx]
             current_transaction = self.get_transaction(action)
 
-            #start time
+            # initialize start time
             if (current_transaction.start_time == 0):
                 current_transaction.start_time = time.time()
 
+            # if action is commit
             if action.type == "C":
                 current_transaction.validate_time = time.time()
-                if (self.validate(action, current_transaction)):
+                valid, conflict_action = self.validate(action, current_transaction)
+                if (valid):
                     current_transaction.commit()
                     current_transaction.finish_time = time.time()
-                    print("Transaction " + str(current_transaction.transaction_no) + " is committed")
                     time.sleep(SLEEP_TIME)
                     self.log.append(action)                    
                 else:
-                    #rollback
+                    # NOT VALID, ROLLBACK
                     time.sleep(SLEEP_TIME)
-                    print("Transaction " + str(current_transaction.transaction_no) + " is not committed, aborting")
+                    print("Transaction " + str(current_transaction.transaction_no) + " is not committed, " + "conflict with " + conflict_action.type  + str(conflict_action.no)  + "(" + conflict_action.resource +")")
+                    print("Transaction " + str(current_transaction.transaction_no) + " is aborted")
+                    self.log.append(Action("A", current_transaction.transaction_no, ""))
                     current_transaction.start_time = time.time()
                     temp_action_list = deepcopy(self.action_list[:idx+1])
                     for action in current_transaction.action_log:
@@ -76,15 +91,18 @@ class OCC():
                         temp_action_list.append(action)
                     self.action_list = temp_action_list
 
+            # if action is read
             elif action.type == "R":
-                #find the transaction
                 current_transaction.read(action)
-                print("Transaction " + str(current_transaction.transaction_no) + " is read " + action.resource)
                 time.sleep(SLEEP_TIME)
                 self.log.append(action)
+
+            # if action is write
             elif action.type == "W":
                 current_transaction.write(action)
-                print("Transaction " + str(current_transaction.transaction_no) + " is write " + action.resource)
                 time.sleep(SLEEP_TIME)
                 self.log.append(action)
             idx+=1
+
+        print("\nFINAL SCHEDULE:")
+        self.print_result()
