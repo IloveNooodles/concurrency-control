@@ -5,19 +5,17 @@ from typing import List
 #         self.name = name
 
 class Action():
-    def __init__(self, type:str, no:int, resource:str):
+    def __init__(self, type:str, timestamp:int, resource:str):
         # type = "R", "W", "C"
         self.type = type
-        # no : transaction number
-        self.no = no
+        # no : transaction number (timestamp)
+        self.timestamp = timestamp
         # resource : resource name
         self.resource = resource
 
 class Transaction():
-    def __init__(self, no: int):
-        # no : transaction number
-        self.no = no
-        self.start_time = 0
+    def __init__(self, timestamp: int):
+        self.start_time = timestamp
         self.validate_time = 0
         self.finish_time = 0
         self.written_resources = []
@@ -37,9 +35,31 @@ class OCC():
     def __init__(self, num_of_transaction : int, action_list: List[Action]):
         self.list_transaction = [Transaction(i) for i in range(1, num_of_transaction + 1)]
         self.action_list = action_list
-
+    
+    def validate(self, action):
+        # check if the transaction is valid
+        # if valid, commit
+        # else abort
+        for transaction in self.list_transaction:
+            if action.timestamp == transaction.start_time:
+                current_transaction = transaction
+        # start validate
+        for to_be_checked_transaction in self.list_transaction:
+            pass
     def start(self):
-        pass
+        idx = 0
+        for action in self.action_list:
+            if action.type == "C":
+                if (idx == 0):
+                    self.commit(action.timestamp)
+            elif action.type == "R":
+                if (idx == 0):
+                    self.read(action.timestamp, action.resource)
+            elif action.type == "W":
+                if (idx == 0):
+                    self.write(action.timestamp, action.resource)
+                else:
+                    self.validate(self, action)
         
 if __name__ == "__main__":
     filename = "test/tc1.txt"
