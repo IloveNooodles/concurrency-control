@@ -46,10 +46,9 @@ class Main():
             protocol = Simple(self.schedule)
             protocol.run()
         elif self.options == 'optimistic':
-            pass
+            protocol = OCC(self.schedule)
+            protocol.run()
           
-
-
 if __name__ == "__main__":
     main = Main()
     main.start()
