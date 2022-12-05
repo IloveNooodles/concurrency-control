@@ -27,7 +27,6 @@ class Main():
         self.options = getattr(args, "concurrency_control")
         self.filepath = getattr(args, "schedule_input")
         self.schedule = None
-    
     def read_files(self):
         try:
             file = open(self.filepath, "r")
@@ -48,6 +47,7 @@ class Main():
         elif self.options == 'optimistic':
             protocol = OCC(self.schedule)
             protocol.run()
+        print(self.schedule)
           
 if __name__ == "__main__":
     main = Main()
